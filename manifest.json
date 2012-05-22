@@ -1,0 +1,27 @@
+{
+  "name": "Interesting SO posts",
+  "version": "1.0",
+  "manifest_version": 2,
+  "description": "Displays interesting posts for any StackOverflow user",
+  "permissions": [
+    "http://api.stackexchange.com/",
+    "http://localhost:8983/"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+		"*://stackoverflow.com/users/*?tab=summary",
+		"*://stackoverflow.com/users/*/*"
+	  ],
+	  "exclude_matches": [
+	    "*://stackoverflow.com/users/*?tab=a*",
+	    "*://stackoverflow.com/users/*?tab=b*",
+	    "*://stackoverflow.com/users/*?tab=f*",
+	    "*://stackoverflow.com/users/*?tab=q*",
+	    "*://stackoverflow.com/users/*?tab=r*",
+	    "*://stackoverflow.com/users/*?tab=t*"
+	  ],
+      "js" : ["jquery.min.js", "pretty.js", "interesting.js"]
+    }
+  ]
+}
