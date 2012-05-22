@@ -21,7 +21,15 @@
 	    "*://stackoverflow.com/users/*?tab=r*",
 	    "*://stackoverflow.com/users/*?tab=t*"
 	  ],
-      "js" : ["jquery.min.js", "pretty.js", "interesting.js"]
+      "js" : [
+		"jquery.min.js", 
+		"RGraph.common.core.js",
+		"RGraph.common.tooltips.js",
+		"RGraph.common.dynamic.js",
+		"RGraph.rose.js",
+		"pretty.js", 
+		"interesting.js"
+	  ]
     }
   ]
 }

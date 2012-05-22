@@ -23,7 +23,7 @@ function fetchTopTags(callback) {
 
 function onText(data) {
   var total_answer_score = 0;
-  var total_answer_count = $('.user-panel-answers .count').text();
+  var total_answer_count = $('#user-panel-answers .count').first().text();
   var query = "";
 
   $.each(data['items'], function(index, value) {
@@ -31,10 +31,12 @@ function onText(data) {
   });
 
   $.each(data['items'], function(index, value) {
-    if (value['answer_score'] > 0 ) {
+     if (index>10) return false;
+     if (value['answer_score'] > 0 ) {
       topTags[value['tag_name']] = { 
-		'avg_score_per_answer' : value['answer_score']/value['answer_count'],
+		'avg_score_per_answer' : Math.round((value['answer_score']/value['answer_count'])*10)/10,
 		'answer_count' : value['answer_count'],
+		'answer_score' : value['answer_score'],
 	    'answer_distribution' : value['answer_count']/total_answer_count, 
 		'score_distribution' : value['answer_score']/total_answer_score
 	  };
@@ -72,13 +74,62 @@ function onResults(data, callback) {
 
   interestingDiv.insertBefore('#user-panel-questions');
 
-  // visualize tags
-  var raceDiv = $('<div/>').addClass('user-panel');
+
+  // visualize tags, knowledge breakdown
+  var roseDiv = $('<div/>').addClass('user-panel');
+  
+  var canvas = $('<canvas/>').attr({
+	id: 'roseChart',
+	width: 450,
+	height: 300
+  });
+
+  roseDiv.append(
+	$('<div/>').addClass('subheader').append($('<h1/>').text('Knowledge Transfer')), 
+	$('<div/>').addClass('user-panel-content').append(canvas));
+
+  roseDiv.insertBefore('#user-panel-questions');
+
+  var chartData = Array(); // array of pairs [a,b] where a is the count, and b is the magnitude 
+  var chartLabels = Array(); // array of labels
+  var chartTooltips = Array();
+
+  $.each(topTags, function(name, value) {
+	console.log(name + ': %o', value);
+	chartData.push(new Array(Math.log(value['avg_score_per_answer']*70),value['answer_count']));
+	chartLabels.push(name);
+	chartTooltips.push(value['answer_count']+' questions answered about <b>'+name+'</b> with an average score of '+value['avg_score_per_answer']);
+  });
+
+  var rose = new RGraph.Rose('roseChart', chartData);
+  rose.Set('chart.variant', 'non-equi-angular');
+  rose.Set('chart.exploded', 5);
+  rose.Set('chart.ymax', 6);
+  rose.Set('chart.colors.alpha', 0.75);
+  rose.Set('chart.colors.sequential', true);
+  rose.Set('chart.text.size', 10);
+  rose.Set('chart.text.color', '#555');
+  rose.Set('chart.labels', chartLabels);
+  rose.Set('chart.tooltips', chartTooltips);
+  rose.Set('chart.tooltips.event', 'onmouseover');
+  rose.Set('chart.gutter.left', 100);
+  rose.Set('chart.gutter.right', 100);
+  //rose.Set('chart.labels.position', 'center');
+  rose.Set('chart.labels.axes', '');
+  rose.Draw();  
+
+  // draw Rose chart
+  // var rose = new RGraph.Rose('rose3', [[1,2], [3,4], [5,6] ...]);
+  // rose.Set('chart.tooltips', function(index) {
+  //   if() // ... setup chart
+  //});
+  //
+  // rose.Draw();
+
+
+/*
   var raceList = $('<ul/>').attr('id', 'user-panel-race');
 
-  raceDiv.append(
-	$('<div/>').addClass('subheader').append($('<h1/>').text('Knowledge Utility per Topic')), 
-	$('<div/>').addClass('user-panel-content').append(raceList));
 
 
   $.each(topTags, function(name, value) {
@@ -91,8 +142,7 @@ function onResults(data, callback) {
 		
 	raceList.append($('<li/>').append(link).append(pct));
   });	
-  
-  raceDiv.insertBefore('#user-panel-questions');
+*/
 
 };
 
