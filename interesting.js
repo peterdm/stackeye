@@ -7,15 +7,7 @@ var uid = uidPattern.exec(document.URL);
 
 var query = "";
 var topTags = {};
-var chariotRace = { 
-	"python" : {
-		answer_distribution: 0.5,
-		avg_score_per_answer: 0.1666666
-	},
-	"python-2.7" : {
-		answer_distribution: 0.5,
-		avg_score_per_answer: 1		
-	}};
+
 
 function fetchTopTags(callback) {
   $.getJSON("http://api.stackexchange.com/2.0/users/"+uid+"/top-answer-tags", { site: "stackoverflow" }, callback);
@@ -23,7 +15,7 @@ function fetchTopTags(callback) {
 
 function onText(data) {
   var total_answer_score = 0;
-  var total_answer_count = $('#user-panel-answers .count').first().text();
+  var total_answer_count = $('#user-panel-answers .count').first().text().replace(/\,/g,'');
   var query = "";
 
   $.each(data['items'], function(index, value) {
@@ -97,7 +89,7 @@ function onResults(data, callback) {
   $.each(topTags, function(name, value) {
 	console.log(name + ': %o', value);
 	chartData.push(new Array(Math.log(value['avg_score_per_answer']*70),value['answer_count']));
-	chartLabels.push(name);
+	if (value['answer_distribution'] > 0.035) { chartLabels.push(name); } else { chartLabels.push(''); } // labels collide with small slices
 	chartTooltips.push(value['answer_count']+' questions answered about <b>'+name+'</b> with an average score of '+value['avg_score_per_answer']);
   });
 
@@ -118,39 +110,6 @@ function onResults(data, callback) {
   rose.Set('chart.labels.axes', '');
   rose.Draw();  
 
-  // draw Rose chart
-  // var rose = new RGraph.Rose('rose3', [[1,2], [3,4], [5,6] ...]);
-  // rose.Set('chart.tooltips', function(index) {
-  //   if() // ... setup chart
-  //});
-  //
-  // rose.Draw();
-
-
-/*
-  var raceList = $('<ul/>').attr('id', 'user-panel-race');
-
-
-
-  $.each(topTags, function(name, value) {
-    var link = $('<a/>').addClass('post-tag');
-    link.attr('href', '/search?q=user:'+uid+'+['+name+']');
-	link.text(name + ' (' + Math.round(value['answer_distribution']*100) + '% of answers)');
-	
-	var pct = $('<span/>').addClass('item-multiplier item-multiplier-count')
-		.text(Math.round(value['avg_score_per_answer']*100)/100 + ' avg score'); 
-		
-	raceList.append($('<li/>').append(link).append(pct));
-  });	
-*/
-
-};
-
-// Want to visualize top-keywords for questions-answered (broken down by keyword / pie-chart?)
-// Also want to visualize top-scoring keywords for questions-answered
-
-// Maybe pie-by-questions answered, then widen-or-narrow segment (or change color) based upon points
-// Or Variable-width histogram
 
 
 $(document).ready(function () {
